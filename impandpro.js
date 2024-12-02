@@ -1,5 +1,6 @@
 import os
 import cv2
+import json
 import pytesseract
 import numpy as np
 from pytesseract import Output
@@ -16,7 +17,11 @@ dest = (0, 310, 480, 370)
 
 
 
+#DEBUG IMPORT ONLY
 
+im = Image.open("forest.jpg")
+
+im.save("capture.png")
 
 #Process OCR
 
