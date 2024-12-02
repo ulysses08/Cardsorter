@@ -15,9 +15,11 @@ I don't think foil recognition will work initially either. Starting points thoug
 
 Planned dependecies.
 Tesseract-ocr https://github.com/tesseract-ocr/tesseract - For OCR
+pytesseract
 fswebcam https://github.com/fsphil/fswebcam - Webcam capture
 pillow https://pypi.org/project/pillow/ - image manipulation
-
+numpy
+cv2
 
 Roadmap:
 
