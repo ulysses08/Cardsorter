@@ -16,7 +16,7 @@ I don't think foil recognition will work initially either. Starting points thoug
 
 Roadmap:
 
-a0.1:
+0.1:
 Software:
 -OCR working and outputting the base variables for base card format.
   Card Type - Single Character - type_line - contains converted full word
@@ -24,7 +24,7 @@ Software:
   Set - String - set
   Language - String - lang
   
-a0.2:
+0.2:
 Software:
 -Use Json from scryfall to pull additional variables and print to terminal
   Scryfall ID - String - id
@@ -36,7 +36,7 @@ Software:
   Small Scan URL - String
   Normal Scan URL - String
 
-a0.3:
+0.3:
 Software:
 -Connect to SQL database locally to store currently held cards. Store all generated variables locally. Store duplicates as incrementing qty variable.
   Card Type - Single Character - type_line - contains converted full word
@@ -55,7 +55,7 @@ Software:
   Is foil - Bool
   Special Type - String (no or name the type)
 
-a0.4:
+0.4:
 Software:
 -Web interface to:
   control the scanner
@@ -66,7 +66,7 @@ Zero impact moving cards around. Need to research the safest way so cards wont b
 
 Prior to 0.8 manual moving of cards will be needed.
 
-a0.5:
+0.5:
 
 -SQL updates
   Add options to place cards in seperate collections.
@@ -80,18 +80,18 @@ Hardware:
 
 Work on the automatic card movement, multiple bins and sorting rules set manually.
 
-a0.6:
+0.6:
 
 Need to be able to recognize Foil copies properly.
 
 Hardware:
 First hardware proto ready for testing.
 
-a0.7:
+0.7:
 
 Add option to web interface to connect to external SQL
 
-a0.8:
+0.8:
 
 Ideas for recognizing pre VMA Cards / Specialty cards
 
