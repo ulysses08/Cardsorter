@@ -5,7 +5,7 @@ Idea is based on OCR of only the bottom corner of the card to recognize the ID n
 
 Modern card id layout started in VMA (Vintage Masters June 16 2014).
 
-System will not initially work for any cards from prior to that.
+System will not initially work for any cards from prior to that. Also some odd types of limited run and specialty cards won't work. Need to detect and filter out errors.
 
 I have ideas but nothing concrete to fix that.
 
@@ -13,11 +13,18 @@ I have ideas but nothing concrete to fix that.
 I don't think foil recognition will work initially either. Starting points though.
 
 
+Planned dependecies.
+Tesseract-ocr https://github.com/tesseract-ocr/tesseract - For OCR
+fswebcam https://github.com/fsphil/fswebcam - Webcam capture
+pillow https://pypi.org/project/pillow/ - image manipulation
+
 
 Roadmap:
 
 0.1:
 Software:
+-Capture image of card
+-Crop image to only show ID corner. While debug is flagged, crop a second copy that shows the full card (Save Orig, IDCrop, CardCrop, then delete Orig)
 -OCR working and outputting the base variables for base card format.
   Card Type - Single Character - type_line - contains converted full word
   Card Number - String - collector_number - Need to trim leading zeros
