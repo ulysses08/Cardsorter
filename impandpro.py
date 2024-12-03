@@ -7,8 +7,7 @@ import pytesseract
 import numpy as np
 import requests
 import re
-from pytesseract import Output
-from PIL import Image, ImageOps
+from PIL import Image
 
 #Debug use ONLY
 debug = True
