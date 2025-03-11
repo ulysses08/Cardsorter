@@ -1,5 +1,3 @@
-# source /home/grant/cardscanner/.venv/bin/activate
-
 import os
 import cv2
 import json
@@ -7,7 +5,23 @@ import pytesseract
 import numpy as np
 import requests
 import re
+from datetime import date, datetime, timedelta
+import mysql.connector
 from PIL import Image
+
+database = mysql.connector.connect(user='grant', password='5564177',
+                                 host='127.0.0.1',
+                                 database='cardstorage')
+
+cursor = database.cursor()
+
+
+
+def insert(item, quantity, price):
+    cursor.execute("INSERT INTO sets (set_code, set_name, release_date) VALUES (%s, %s, %s)", (item, quantity, price))
+    database.commit()
+    #database.close()
+
 
 #Debug use ONLY
 debug = True
@@ -26,9 +40,11 @@ cardnumber = 0
 
 #Setlist update
 setlistupate = False
+setupd = ""
+setnamupd = ""
+setrelupd = ""
 
 #Paths
-allcards = "data/allcards.json"
 setlist = "data/setlist.json"
 debugimg = "images/debug.jpg"
 captureimg = "images/capture.png"
@@ -39,10 +55,24 @@ if setlistupate == True:
     resp = requests.get('https://api.scryfall.com/sets', 'data')
     data = resp.json()
     length = len(data['data'])
-	
-    with open(setlist) as f:
-        json.dump(data, f)
-    print("Setlist updated")
+
+    for info in data['data'][loop]:
+
+        while loop < length:
+            setupd = data['data'][loop]['code']
+            setnamupd = data['data'][loop]['name']
+            setrelupd = data['data'][loop]['released_at']
+
+            print(setupd)
+            print(setnamupd)
+            print(setrelupd)
+
+            insert(setupd, setnamupd, setrelupd)
+            
+
+            loop += 1
+
+
     setlistupate = False
 else:
     with open(setlist) as f:
