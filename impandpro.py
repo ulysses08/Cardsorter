@@ -9,22 +9,21 @@ from datetime import date, datetime, timedelta
 import mysql.connector
 from PIL import Image
 
-database = mysql.connector.connect(user='grant', password='5564177',
-                                 host='127.0.0.1',
-                                 database='cardstorage')
+#Paths
+setlist = "data/setlist.json"
+debugimg = "images/debug.jpg"
+captureimg = "images/capture.png"
+idblock = "images/idblock.png"
+creds = '.secret/sql.cnf'
+
+
+database = mysql.connector.connect(option_files = '.secret/sql.cnf')
 
 cursor = database.cursor()
 
+#Create new user
+#CREATE TABLE 'mtgsort'.'testuser' ('id' varchar(40) NOT NULL, 'name' varchar(150) DEFAULT NULL, 'setname' varchar(100) DEFAULT NULL, 'imageuri' varchar(200) DEFAULT NULL, 'amount' bigint DEFAULT NULL, PRIMARY KEY ('id'));
 
-
-def insert(item, quantity, price):
-    cursor.execute("INSERT INTO sets (set_code, set_name, release_date) VALUES (%s, %s, %s)", (item, quantity, price))
-    database.commit()
-    #database.close()
-
-
-#Debug use ONLY
-debug = True
 
 #Variables
 cardtypes = "LCURM"
@@ -37,6 +36,7 @@ check = ""
 currset = ""
 currtype = ""
 cardnumber = 0
+activeuser = ""
 
 #Setlist update
 setlistupate = False
@@ -44,11 +44,22 @@ setupd = ""
 setnamupd = ""
 setrelupd = ""
 
-#Paths
-setlist = "data/setlist.json"
-debugimg = "images/debug.jpg"
-captureimg = "images/capture.png"
-idblock = "images/idblock.png"
+
+
+#DEBUG FUNCTIONS
+debug = True
+if debug == True:
+    im = Image.open(debugimg)
+    im.save(captureimg)
+    activeuser = "testuser"
+    
+
+
+
+#Setlist Update
+def insert(setcode, setname, releasedate):
+    cursor.execute("INSERT INTO sets (set_code, set_name, release_date) VALUES (%s, %s, %s)on DUPLICATE KEY Update set_code = set_code", (setupd, setnamupd, setrelupd))
+    database.commit()
 
 #Refresh Setlist - Need to seperate and update the file intermittently.
 if setlistupate == True:
@@ -63,30 +74,27 @@ if setlistupate == True:
             setnamupd = data['data'][loop]['name']
             setrelupd = data['data'][loop]['released_at']
 
-            print(setupd)
-            print(setnamupd)
-            print(setrelupd)
+            if debug == True:
+                print(setupd)
+                print(setnamupd)
+                print(setrelupd)
 
-            insert(setupd, setnamupd, setrelupd)
+            cursor.execute("INSERT INTO sets (set_code, set_name, release_date) VALUES (%s, %s, %s)on DUPLICATE KEY Update set_code = set_code", (setupd, setnamupd, setrelupd))
+            #database.commit()
             
-
             loop += 1
+            
+    database.commit()
 
+cursor.execute("SELECT set_code, set_name, release_date FROM sets")
+data = cursor.fetchall()
+length = len(data)
 
-    setlistupate = False
-else:
-    with open(setlist) as f:
-        data = json.load(f)
-        length = len(data['data'])
 #Capture image
 
+print(length)
 
 
-
-#DEBUG IMPORT ONLY
-if debug == True:
-	im = Image.open(debugimg)
-	im.save(captureimg)
 
 #Process OCR
 
@@ -102,7 +110,7 @@ img = cv2.imread(idblock)
 
 carddetails = pytesseract.image_to_string(img)
 
-#print(carddetails) #Remove after debugging complete
+
 
 os.remove(idblock)
 os.remove(captureimg)
@@ -110,14 +118,19 @@ os.remove(captureimg)
 
 #Process the string to an array
 
-#print(carddetails[0])
+if(debug == True):
+    print(carddetails[0])
+    print(carddetails)
 
 #Define if it is a recognised card type and determine the rarity
 if cardtypes.find(carddetails[0]) >= 0:
-	#print("It's a card")
 	currtypetemp = carddetails[0]
+	if(debug == True):
+		print("It's a card")
+
 if cardtypes.find(carddetails[0]) == -1:
-	print("It's not a card")
+	if(debug == True):
+		print("It's not a card")
 
 loop = 0
 check = ""
@@ -125,10 +138,10 @@ check = ""
 
 #Determine the set
 while loop < length:
-	check = data['data'][loop]['code'].upper()
+	check = data[loop][0].upper()
 	if carddetails.count(check) > 0:
 		currsetcode = check
-		currset = data['data'][loop]['name']
+		currset = data[loop][0]
 	loop += 1
 
 match currtypetemp:
@@ -144,7 +157,7 @@ match currtypetemp:
 		currtype = "Mythic"
 
 
-p = '[\d]+' #Regex to find the card number
+p = r'[\d]+' #Regex to find the card number
 
 if re.search(p, carddetails) is not None:
     for catch in re.finditer(p, carddetails):
@@ -154,24 +167,25 @@ else:
 	print("No card number found")
 
 
-
-
-
-
-#print(currtype)
-#print(currset)
-#print(cardnumber)
-
-
 #Get card details
 resp1 = requests.get('https://api.scryfall.com/cards/search?q=e:'+currsetcode+'+r:'+currtype+'+cn:'+cardnumber)
 data1 = resp1.json()
-print("")
-print('ID: '+data1['data'][0]["id"])
-print('Name: '+data1['data'][0]["name"])
-print('Set: '+data1['data'][0]["set_name"])
-print('Type: '+data1['data'][0]["type_line"])
-print('Rarity: '+data1['data'][0]["rarity"])
-print('Full art: '+str(data1['data'][0]["full_art"]))
-print('Price: $'+str(data1['data'][0]["prices"]["usd"]))
-print('Price foil: $'+str(data1['data'][0]["prices"]["usd_foil"]))
+
+if debug == True:
+    print("")
+    print('ID: '+data1['data'][0]["id"])
+    print('Name: '+data1['data'][0]["name"])
+    print('Set: '+data1['data'][0]["set_name"])
+    print('Type: '+data1['data'][0]["type_line"])
+    print('Rarity: '+data1['data'][0]["rarity"])
+    print('Full art: '+str(data1['data'][0]["full_art"]))
+    print('Price: $'+str(data1['data'][0]["prices"]["usd"]))
+    print('Price foil: $'+str(data1['data'][0]["prices"]["usd_foil"]))
+    print('Image: '+data1['data'][0]["image_uris"]["normal"])
+
+
+#Insert into database  
+
+
+cursor.execute('INSERT INTO '+activeuser+' (id, name, setname, imageuri, amount) VALUES (%s, %s, %s, %s, 1) on DUPLICATE KEY Update amount = amount + 1', (data1['data'][0]["id"],data1['data'][0]["name"],data1['data'][0]["set_name"],data1['data'][0]["image_uris"]["normal"],))
+database.commit()
